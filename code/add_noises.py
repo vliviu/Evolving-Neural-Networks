@@ -1,16 +1,23 @@
-
 import cPickle
 import gzip
 import time
 import PIL.Image
 import math
-
 import numpy
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import matplotlib.cm as cm
 
 import theano
 import theano.tensor as T
 import os
-from logistic_sgd import load_data
+
+__author__ = "Tianwei Shen"
+__copyright__ = "Copyright 2013, The Neuroblaze Project"
+__license__ = "GPL"
+__version__ = "1.0.1"
+__maintainer__ = "Tianwei Shen"
+__email__ = "shentianweipku@gmail.com"
 
 def shared_dataset(data_xy, borrow=True):
     """ Function that loads the dataset into shared variables
@@ -26,7 +33,7 @@ def shared_dataset(data_xy, borrow=True):
     shared_y = theano.shared(numpy.asarray(data_y,dtype=theano.config.floatX),borrow=borrow)
     return shared_x, T.cast(shared_y, 'int32')
     
-def add_frame(dataset='../data/mnist.pkl.gz', width=2):
+def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
     ''' Loads the dataset, then a frame to all the images in the datasets
 
     :type dataset: string
@@ -66,6 +73,7 @@ def add_frame(dataset='../data/mnist.pkl.gz', width=2):
             (test_set_x, test_set_y)]
     return rval
     '''
+    
     #assume that the images are square, the length of image is
     imageLength = int(math.sqrt(train_set[0].shape[1]))
     print 'the length of image is ', imageLength
@@ -91,6 +99,14 @@ def add_frame(dataset='../data/mnist.pkl.gz', width=2):
                 test_set[0][i][(imageLength-1-j)*imageLength+k] = 1.0
                 test_set[0][i][k*imageLength+j] = 1.0
                 test_set[0][i][k*imageLength+(imageLength-1-j)] = 1.0
+                
+    '''
+    image = train_set[0][500]
+    image = image.reshape(28,28)
+    plt.imshow(image,cmap=cm.Greys_r)
+    plt.show()
+    '''
+    
     #save noisy dataset
     os.chdir('../data')
     noisy_data = (train_set,valid_set,test_set)
@@ -109,4 +125,6 @@ def add_frame(dataset='../data/mnist.pkl.gz', width=2):
     
     
 if __name__ == '__main__':
-    add_frame('../data/mnist.pkl.gz',2)
+    #plt.plot([1,2,3,4])
+    #plt.show()
+    add_frame_noise('../data/mnist.pkl.gz',2)
