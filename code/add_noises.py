@@ -7,6 +7,7 @@ import numpy
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib.cm as cm
+import random
 
 import theano
 import theano.tensor as T
@@ -77,6 +78,7 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
     #assume that the images are square, the length of image is
     print 'Adding noise'
     imageLength = int(math.sqrt(train_set[0].shape[1]))
+    #adding noise to train_set
     for i in xrange(train_set[0].shape[0]):
         #add a white frame
         for j in xrange(width):
@@ -85,6 +87,8 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
                 train_set[0][i][(imageLength-1-j)*imageLength+k] = 1.0
                 train_set[0][i][k*imageLength+j] = 1.0
                 train_set[0][i][k*imageLength+(imageLength-1-j)] = 1.0
+
+    #adding noise to the validation set
     for i in xrange(valid_set[0].shape[0]):
         for j in xrange(width):
             for k in xrange(imageLength):
@@ -92,6 +96,8 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
                 valid_set[0][i][(imageLength-1-j)*imageLength+k] = 1.0
                 valid_set[0][i][k*imageLength+j] = 1.0
                 valid_set[0][i][k*imageLength+(imageLength-1-j)] = 1.0
+
+    #adding noise to the test set
     for i in xrange(test_set[0].shape[0]):
         for j in xrange(width):
             for k in xrange(imageLength):
@@ -100,12 +106,6 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
                 test_set[0][i][k*imageLength+j] = 1.0
                 test_set[0][i][k*imageLength+(imageLength-1-j)] = 1.0
                 
-    '''
-    image = train_set[0][500]
-    image = image.reshape(28,28)
-    plt.imshow(image,cmap=cm.Greys_r)
-    plt.show()
-    '''
     
     #save noisy dataset
     os.chdir('../data')
@@ -123,11 +123,54 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
     f_out.close()
     f_in.close()
 
-def add_random_patch_noise(dataset='../data/mnist.pkl.gz', width=2):
-    print 1
+def add_random_noise(dataset='../data/mnist.pkl.gz', number=208):
+    '''
+    add random uncorrelated noise to the images
+    type dataset: str
+    param1: the name of the dataset
+    type number: int
+    param2: the number of pixel to flip to 1
+    '''
+    #fixed the number of pixels, flip the pixel(set to 1)
+    f = gzip.open(dataset, 'rb')
+    train_set, valid_set, test_set = cPickle.load(f)
+    f.close()
+    thresh = number / train_set[0].shape[1]
+    print 'Adding noise to training set'
+    for i in xrange(train_set[0].shape[0]):
+        random_array = [1 if random.random()>thresh else 0 for _ in range(train_set[0].shape[1])]
+        train_set[0][i] = train_set[0][i] * random_array
+    
+    print 'Adding noise to the test set'
+    for i in xrange(test_set[0].shape[0]):
+        random_array = [1 if random.random()>thresh else 0 for _ in range(test_set[0].shape[1])]
+        test_set[0][i] = test_set[0][i] * random_array
+
+    print 'Adding noise to the valid set'
+    for i in xrange(valid_set[0].shape[0]):
+        random_array = [1 if random.random()>thresh else 0 for _ in range(valid_set[0].shape[1])]
+        valid_set[0][i] = valid_set[0][i] * random_array
+
+    print 'Saving the dataset'
+    os.chdir('../data')
+    noisy_data = (train_set,valid_set,test_set)
+    data_filename = 'mnist'+str(number)+'random.pkl'
+    noisy_data_file = file(data_filename,'wb')
+    cPickle.dump(noisy_data, noisy_data_file, protocol = cPickle.HIGHEST_PROTOCOL)
+    noisy_data_file.close()
+
+    #compress the noisy data file with gzip
+    f_in = open(data_filename, 'rb')
+    f_out = gzip.open(data_filename+'.gz', 'wb')
+    f_out.writelines(f_in)
+    f_out.close()
+    f_in.close()
     
     
 if __name__ == '__main__':
     #plt.plot([1,2,3,4])
     #plt.show()
-    add_frame_noise('../data/mnist.pkl.gz',3)
+    #add_frame_noise('../data/mnist.pkl.gz',2)
+    #mnist2framed.pkl changes num_changed_pixel pixels
+    num_changed_pixel = 28 * 2 * 4 - 4 * 2 * 2
+    add_random_noise(dataset='../data/mnist.pkl.gz', number=num_changed_pixel)
