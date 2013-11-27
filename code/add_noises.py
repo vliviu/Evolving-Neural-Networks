@@ -75,8 +75,8 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
     '''
     
     #assume that the images are square, the length of image is
+    print 'Adding noise'
     imageLength = int(math.sqrt(train_set[0].shape[1]))
-    print 'the length of image is ', imageLength
     for i in xrange(train_set[0].shape[0]):
         #add a white frame
         for j in xrange(width):
@@ -122,9 +122,12 @@ def add_frame_noise(dataset='../data/mnist.pkl.gz', width=2):
     f_out.writelines(f_in)
     f_out.close()
     f_in.close()
+
+def add_random_patch_noise(dataset='../data/mnist.pkl.gz', width=2):
+    print 1
     
     
 if __name__ == '__main__':
     #plt.plot([1,2,3,4])
     #plt.show()
-    add_frame_noise('../data/mnist.pkl.gz',2)
+    add_frame_noise('../data/mnist.pkl.gz',3)
