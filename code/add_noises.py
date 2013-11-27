@@ -135,20 +135,20 @@ def add_random_noise(dataset='../data/mnist.pkl.gz', number=208):
     f = gzip.open(dataset, 'rb')
     train_set, valid_set, test_set = cPickle.load(f)
     f.close()
-    thresh = number / train_set[0].shape[1]
-    print 'Adding noise to training set'
+    thresh = float(number) / float(train_set[0].shape[1])
+    print 'Adding noise to the training set'
     for i in xrange(train_set[0].shape[0]):
-        random_array = [1 if random.random()>thresh else 0 for _ in range(train_set[0].shape[1])]
+        random_array = [0 if random.random()>thresh else 1 for _ in range(train_set[0].shape[1])]
         train_set[0][i] = train_set[0][i] * random_array
     
     print 'Adding noise to the test set'
     for i in xrange(test_set[0].shape[0]):
-        random_array = [1 if random.random()>thresh else 0 for _ in range(test_set[0].shape[1])]
+        random_array = [0 if random.random()>thresh else 1 for _ in range(test_set[0].shape[1])]
         test_set[0][i] = test_set[0][i] * random_array
 
     print 'Adding noise to the valid set'
     for i in xrange(valid_set[0].shape[0]):
-        random_array = [1 if random.random()>thresh else 0 for _ in range(valid_set[0].shape[1])]
+        random_array = [0 if random.random()>thresh else 1 for _ in range(valid_set[0].shape[1])]
         valid_set[0][i] = valid_set[0][i] * random_array
 
     print 'Saving the dataset'
