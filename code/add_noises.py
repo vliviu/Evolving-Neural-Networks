@@ -138,18 +138,21 @@ def add_random_noise(dataset='../data/mnist.pkl.gz', number=208):
     thresh = float(number) / float(train_set[0].shape[1])
     print 'Adding noise to the training set'
     for i in xrange(train_set[0].shape[0]):
-        random_array = [0 if random.random()>thresh else 1 for _ in range(train_set[0].shape[1])]
-        train_set[0][i] = train_set[0][i] * random_array
+        random_array = [1 if random.random()>thresh else 0 for _ in range(train_set[0].shape[1])]
+        for pos in xrange(train_set[0].shape[1]):
+            train_set[0][i][pos] = train_set[0][i][pos] if random_array[pos] else 1
     
     print 'Adding noise to the test set'
     for i in xrange(test_set[0].shape[0]):
-        random_array = [0 if random.random()>thresh else 1 for _ in range(test_set[0].shape[1])]
-        test_set[0][i] = test_set[0][i] * random_array
+        random_array = [1 if random.random()>thresh else 0 for _ in range(test_set[0].shape[1])]
+        for pos in xrange(test_set[0].shape[1]):
+            test_set[0][i][pos] = test_set[0][i][pos] if random_array[pos] else 1
 
     print 'Adding noise to the valid set'
     for i in xrange(valid_set[0].shape[0]):
-        random_array = [0 if random.random()>thresh else 1 for _ in range(valid_set[0].shape[1])]
-        valid_set[0][i] = valid_set[0][i] * random_array
+        random_array = [1 if random.random()>thresh else 0 for _ in range(valid_set[0].shape[1])]
+        for pos in xrange(valid_set[0].shape[1]):
+            valid_set[0][i][pos] = valid_set[0][i][pos] if random_array[pos] else 1
 
     print 'Saving the dataset'
     os.chdir('../data')
@@ -173,4 +176,4 @@ if __name__ == '__main__':
     #add_frame_noise('../data/mnist.pkl.gz',2)
     #mnist2framed.pkl changes num_changed_pixel pixels
     num_changed_pixel = 28 * 2 * 4 - 4 * 2 * 2
-    add_random_noise(dataset='../data/mnist.pkl.gz', number=num_changed_pixel)
+    add_random_noise(dataset='../data/mnist.pkl.gz', number=100)
