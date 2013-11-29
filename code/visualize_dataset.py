@@ -40,7 +40,7 @@ def visualize_dataset(dataset, width, height):
         for j in xrange(width):
             num = i * width + j
             image[1+i*(imageLength+1):1+i*(imageLength+1)+imageLength, 1+j*(imageLength+1):1+j*(imageLength+1)+imageLength]=\
-                    train_set[0][num].reshape(imageLength, imageLength)
+                    test_set[0][num].reshape(imageLength, imageLength)
     plt.imshow(image,cmap=cm.Greys_r)
     plt.show()
 
@@ -49,4 +49,4 @@ if __name__ == '__main__':
     visualize_dataset('../data/mnist2framed.pkl.gz', 5, 5)
 
     print 'visualize random noise dataset'
-    visualize_dataset('../data/mnist208random.pkl.gz', 5, 5)
+    visualize_dataset('../data/mnist100random.pkl.gz', 5, 5)
