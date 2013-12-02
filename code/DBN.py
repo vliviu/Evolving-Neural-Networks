@@ -69,7 +69,7 @@ class DBN(object):
         # construct the DBN as a deep multilayer perceptron, and when
         # constructing each sigmoidal layer we also construct an RBM
         # that shares weights with that layer. During pretraining we
-        # will train these RBMs (which will lead to chainging the
+        # will train these RBMs (which will lead to changing the
         # weights of the MLP as well) During finetuning we will finish
         # training the DBN by doing stochastic gradient descent on the
         # MLP.
@@ -255,7 +255,8 @@ class DBN(object):
 
 def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
              pretrain_lr=0.01, k=1, training_epochs=1000,
-             dataset='../data/mnist.pkl.gz', batch_size=10):
+             dataset='../data/mnist.pkl.gz', batch_size=10,
+             output_folder='dbn_models'):
     """
     Demonstrates how to train and test a Deep Belief Network.
 
@@ -287,7 +288,7 @@ def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
     n_train_batches = train_set_x.get_value(borrow=True).shape[0] / batch_size
 
     # numpy random generator
-    numpy_rng = numpy.random.RandomState(123)
+    numpy_rng = numpy.random.RandomState(int(time.time()))
     print '... building the model'
     # construct the Deep Belief Network
     dbn = DBN(numpy_rng=numpy_rng, n_ins=28 * 28,
@@ -297,13 +298,17 @@ def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
     #########################
     # PRETRAINING THE MODEL #
     #########################
+    if not os.path.isdir(output_folder):
+        os.makedirs(output_folder)
+    os.chdir(output_folder)
+    
     print '... getting the pretraining functions'
     pretraining_fns = dbn.pretraining_functions(train_set_x=train_set_x,
                                                 batch_size=batch_size,
                                                 k=k)
 
     print '... pre-training the model'
-    start_time = time.clock()
+    start_time_pre = time.clock()
     ## Pre-train layer-wise
     for i in xrange(dbn.n_layers):
         # go through pretraining epochs
@@ -316,10 +321,10 @@ def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
             print 'Pre-training layer %i, epoch %d, cost ' % (i, epoch),
             print numpy.mean(c)
 
-    end_time = time.clock()
+    end_time_pre = time.clock()
     print >> sys.stderr, ('The pretraining code for file ' +
                           os.path.split(__file__)[1] +
-                          ' ran for %.2fm' % ((end_time - start_time) / 60.))
+                          ' ran for %.2fm' % ((end_time_pre - start_time_pre) / 60.))
 
     ########################
     # FINETUNING THE MODEL #
@@ -347,7 +352,7 @@ def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
     best_params = None
     best_validation_loss = numpy.inf
     test_score = 0.
-    start_time = time.clock()
+    start_time_fune = time.clock()
 
     done_looping = False
     epoch = 0
@@ -391,15 +396,20 @@ def test_DBN(finetune_lr=0.1, pretraining_epochs=100,
                 done_looping = True
                 break
 
-    end_time = time.clock()
+    end_time_fune = time.clock()
     print(('Optimization complete with best validation score of %f %%,'
            'with test performance %f %%') %
                  (best_validation_loss * 100., test_score * 100.))
     print >> sys.stderr, ('The fine tuning code for file ' +
                           os.path.split(__file__)[1] +
-                          ' ran for %.2fm' % ((end_time - start_time)
+                          ' ran for %.2fm' % ((end_time_fune - start_time_fune)
                                               / 60.))
-
-
+    print >> sys.stderr, ('The total training time ran for %.2fm' % ((end_time_fune - start_time_pre)
+                                              / 60.))
+    #save the trained model
+    print 'Saving the DBN model'
+    dbn_model_file = file('dbn_default_model.save','wb')
+    cPickle.dump(dbn, dbn_model_file, protocol=cPickle.HIGHEST_PROTOCOL)
+    
 if __name__ == '__main__':
     test_DBN()

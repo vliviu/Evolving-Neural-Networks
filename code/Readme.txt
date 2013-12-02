@@ -13,5 +13,8 @@ DBN.py:
 mlp.py:
 	multi layer perceptron, used by DBN.py, theano code
 
+rbm.py: 
+	restricted boltzmann machine, used by DBN.py, theano code
+
 logistic_sgd.py:
 	stochastic gradient descent, used by DBN.py, theano code
